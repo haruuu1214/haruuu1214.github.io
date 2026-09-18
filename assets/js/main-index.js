@@ -394,8 +394,21 @@ function pickedRowClass(ab) {
   return ab.some((c) => c.pickedLabel === "next_position") ? "next-position" : "";
 }
 
+// A cell can have more than one option: when the raw roll is a Rare dupe,
+// the game auto-rerolls it (gacha.js's reroll-on-dupe), so both the raw
+// duplicate and the actual in-game result (`cat.rerolled`) are meaningful
+// and both are shown, stacked, with an arrow to the rerolled outcome
+// (mirrors table.erb inserting a follow-up row for `cat.rerolled`).
 function renderCatCell(state, cat, owned) {
   if (!cat) return "";
+  const parts = [renderCatLink(state, cat, owned)];
+  if (cat.rerolled) {
+    parts.push(`<span class="muted">&rarr;</span> ${renderCatLink(state, cat.rerolled, owned)}`);
+  }
+  return parts.join("<br>");
+}
+
+function renderCatLink(state, cat, owned) {
   const classes = [RARITY_LABEL[cat.rarity] ?? ""];
   if (owned.has(cat.id)) classes.push("owned");
   const label = cat.pickedLabel ? ` (${cat.pickedLabel.replace("_", " ")})` : "";
